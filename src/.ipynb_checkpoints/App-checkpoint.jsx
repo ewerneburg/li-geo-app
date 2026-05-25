@@ -101,7 +101,9 @@ function App() {
           top: "10px",
           left: "10px",
           display: "flex",
-          gap: "10px",
+          flexDirection: "column",
+          gap: "8px",
+          alignItems: "flex-start",
           borderRadius: "8px"
         }}
       >
@@ -231,11 +233,14 @@ function App() {
           position: "absolute",
           zIndex: 1000,
           background: "white",
-          padding: "10px",
-          top: "380px",
-          left: "10px",
-          minWidth: "220px",
-          borderRadius: "8px"
+          padding: "8px 16px",
+          bottom: "210px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          borderRadius: "8px",
+          boxShadow: "0 0 10px rgba(0,0,0,0.2)",
+          fontWeight: "bold",
+          fontSize: "18px"
         }}
       >
         {message}
