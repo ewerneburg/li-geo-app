@@ -10,7 +10,6 @@ import "leaflet/dist/leaflet.css";
 function App() {
 
   const [towns, setTowns] = useState(null);
-  const [roads, setRoads] = useState(null);
 
   const [targetTown, setTargetTown] =
     useState(null);
@@ -27,13 +26,51 @@ function App() {
   const [difficulty, setDifficulty] =
     useState("easy");
 
+  const [region, setRegion] =
+    useState("all");
+
+  const [gameStarted, setGameStarted] =
+    useState(false);
+
   useEffect(() => {
+
+    if (!gameStarted) return;
 
     fetch(`/li_towns_${difficulty}.geojson`)
       .then(res => res.json())
       .then(data => {
 
-        setTowns(data);
+        let filteredFeatures =
+          data.features;
+
+        if (region === "nassau") {
+
+          filteredFeatures =
+            data.features.filter(
+              f =>
+                f.properties.county_name
+                  === "Nassau"
+            );
+
+        } else if (
+          region === "suffolk"
+        ) {
+
+          filteredFeatures =
+            data.features.filter(
+              f =>
+                f.properties.county_name
+                  === "Suffolk"
+            );
+
+        }
+
+        const filteredData = {
+          ...data,
+          features: filteredFeatures
+        };
+
+        setTowns(filteredData);
 
         setCompletedTowns([]);
         setWrongCount(0);
@@ -42,22 +79,18 @@ function App() {
         const seed = Date.now();
 
         const index =
-          seed % data.features.length;
-        
+          seed % filteredFeatures.length;
+
         const randomTown =
-          data.features[index]
+          filteredFeatures[index]
             .properties
             .town_name;
-        
+
         setTargetTown(randomTown);
 
       });
 
-    // fetch("/li_roads.geojson")
-    //   .then(res => res.json())
-    //   .then(data => setRoads(data));
-
-  }, [difficulty]);
+  }, [difficulty, region, gameStarted]);
 
   function pickRandomTown(features) {
 
@@ -88,94 +121,284 @@ function App() {
       .town_name;
   }
 
+  if (!gameStarted) {
+
+    return (
+
+      <div
+        style={{
+          height: "100vh",
+          width: "100vw",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#f5f5f5"
+        }}
+      >
+
+        <div
+          style={{
+            background: "white",
+            padding: "40px",
+            borderRadius: "16px",
+            boxShadow:
+              "0 0 20px rgba(0,0,0,0.15)",
+            width: "320px",
+            textAlign: "center"
+          }}
+        >
+
+          <h1
+            style={{
+              marginBottom: "30px"
+            }}
+          >
+            Long Island Town Quiz
+          </h1>
+
+          <div
+            style={{
+              marginBottom: "25px"
+            }}
+          >
+
+            <h3>Choose Region</h3>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px"
+              }}
+            >
+
+              <button
+                onClick={() =>
+                  setRegion("nassau")
+                }
+                style={{
+                  background:
+                    region === "nassau"
+                      ? "#4a90e2"
+                      : "#ddd",
+                  color:
+                    region === "nassau"
+                      ? "white"
+                      : "black",
+                  padding: "10px",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer"
+                }}
+              >
+                Nassau
+              </button>
+
+              <button
+                onClick={() =>
+                  setRegion("suffolk")
+                }
+                style={{
+                  background:
+                    region === "suffolk"
+                      ? "#e26a6a"
+                      : "#ddd",
+                  color:
+                    region === "suffolk"
+                      ? "white"
+                      : "black",
+                  padding: "10px",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer"
+                }}
+              >
+                Suffolk
+              </button>
+
+              <button
+                onClick={() =>
+                  setRegion("all")
+                }
+                style={{
+                  background:
+                    region === "all"
+                      ? "#666"
+                      : "#ddd",
+                  color:
+                    region === "all"
+                      ? "white"
+                      : "black",
+                  padding: "10px",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer"
+                }}
+              >
+                All Long Island
+              </button>
+
+            </div>
+
+          </div>
+
+          <div
+            style={{
+              marginBottom: "30px"
+            }}
+          >
+
+            <h3>Choose Difficulty</h3>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px"
+              }}
+            >
+
+              <button
+                onClick={() =>
+                  setDifficulty("easy")
+                }
+                style={{
+                  background:
+                    difficulty === "easy"
+                      ? "#4caf50"
+                      : "#ddd",
+                  color:
+                    difficulty === "easy"
+                      ? "white"
+                      : "black",
+                  padding: "10px",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer"
+                }}
+              >
+                Easy
+              </button>
+
+              <button
+                onClick={() =>
+                  setDifficulty("medium")
+                }
+                style={{
+                  background:
+                    difficulty === "medium"
+                      ? "#ff9800"
+                      : "#ddd",
+                  color:
+                    difficulty === "medium"
+                      ? "white"
+                      : "black",
+                  padding: "10px",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer"
+                }}
+              >
+                Medium
+              </button>
+
+              <button
+                onClick={() =>
+                  setDifficulty("hard")
+                }
+                style={{
+                  background:
+                    difficulty === "hard"
+                      ? "#f44336"
+                      : "#ddd",
+                  color:
+                    difficulty === "hard"
+                      ? "white"
+                      : "black",
+                  padding: "10px",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer"
+                }}
+              >
+                Hard
+              </button>
+
+            </div>
+
+          </div>
+
+          <button
+            onClick={() =>
+              setGameStarted(true)
+            }
+            style={{
+              padding: "14px 24px",
+              fontSize: "18px",
+              border: "none",
+              borderRadius: "10px",
+              background: "#222",
+              color: "white",
+              cursor: "pointer",
+              width: "100%"
+            }}
+          >
+            Start Game
+          </button>
+
+        </div>
+
+      </div>
+
+    );
+  }
+
   return (
     <>
 
-      {/* Difficulty Buttons */}
+      {/* Town List */}
       <div
         style={{
           position: "absolute",
           zIndex: 1000,
           background: "white",
           padding: "10px",
-          top: "10px",
-          left: "10px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-          alignItems: "flex-start",
-          borderRadius: "8px"
+          bottom: "10px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "90%",
+          maxHeight: "180px",
+          overflowY: "auto",
+          borderRadius: "8px",
+          boxShadow:
+            "0 0 10px rgba(0,0,0,0.2)"
         }}
       >
 
-        <button
-          onClick={() =>
-            setDifficulty("easy")
-          }
-        >
-          Easy
-        </button>
-
-        <button
-          onClick={() =>
-            setDifficulty("medium")
-          }
-        >
-          Medium
-        </button>
-
-        <button
-          onClick={() =>
-            setDifficulty("hard")
-          }
-        >
-          Hard
-        </button>
-
-      </div>
-
-      {/* Town List */}
-      <div
+        <div
           style={{
-            position: "absolute",
-            zIndex: 1000,
-            background: "white",
-            padding: "10px",
-            bottom: "10px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "90%",
-            maxHeight: "180px",
-            overflowY: "auto",
-            borderRadius: "8px",
-            boxShadow: "0 0 10px rgba(0,0,0,0.2)"
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(120px, 1fr))",
+            gap: "6px",
+            fontSize: "14px",
+            textAlign: "center"
           }}
         >
-        
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(120px, 1fr))",
-              gap: "6px",
-              fontSize: "14px",
-              textAlign: "center"
-            }}
-          >
-        
-            {towns &&
-              [...towns.features]
 
-                  .sort((a, b) =>
-                
-                    a.properties.town_name.localeCompare(
-                      b.properties.town_name
-                    )
-                
-                  )
-                
-                  .map(f => (
-        
+          {towns &&
+            [...towns.features]
+
+              .sort((a, b) =>
+
+                a.properties.town_name.localeCompare(
+                  b.properties.town_name
+                )
+
+              )
+
+              .map(f => (
+
                 <div
                   key={f.properties.town_name}
                   style={{
@@ -185,7 +408,7 @@ function App() {
                       )
                         ? "green"
                         : "black",
-        
+
                     fontWeight:
                       completedTowns.includes(
                         f.properties.town_name
@@ -196,34 +419,33 @@ function App() {
                 >
                   {f.properties.town_name}
                 </div>
-        
+
               ))
             }
-        
-          </div>
-        
+
         </div>
+
+      </div>
 
       {/* Current Target */}
       <div
-          style={{
-              position: "absolute",
-              zIndex: 1000,
-              background: "white",
-              padding: "10px 20px",
-              top: "10px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              borderRadius: "8px",
-              fontSize: "24px",
-              fontWeight: "bold"
-            }}
+        style={{
+          position: "absolute",
+          zIndex: 1000,
+          background: "white",
+          padding: "10px 20px",
+          top: "10px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          borderRadius: "8px",
+          fontSize: "24px",
+          fontWeight: "bold"
+        }}
       >
 
         {targetTown
           ? `Find: ${targetTown}`
-          : "Finished!"
-        }
+          : "Finished!"}
 
       </div>
 
@@ -238,7 +460,8 @@ function App() {
           left: "50%",
           transform: "translateX(-50%)",
           borderRadius: "8px",
-          boxShadow: "0 0 10px rgba(0,0,0,0.2)",
+          boxShadow:
+            "0 0 10px rgba(0,0,0,0.2)",
           fontWeight: "bold",
           fontSize: "18px"
         }}
@@ -247,7 +470,7 @@ function App() {
       </div>
 
       <MapContainer
-        key={difficulty}
+        key={`${difficulty}-${region}`}
         center={[40.8, -73.2]}
         zoom={9}
         zoomControl={false}
@@ -263,7 +486,7 @@ function App() {
 
         {towns && (
           <GeoJSON
-            key={`${difficulty}-${targetTown}-${wrongCount}`}
+            key={`${difficulty}-${region}-${targetTown}-${wrongCount}`}
             data={towns}
 
             style={(feature) => {
@@ -297,25 +520,29 @@ function App() {
                   isCompleted
                     ? "green"
 
-                  : wrongCount >= 3 && isCorrectTown
+                    : wrongCount >= 3 &&
+                      isCorrectTown
                     ? "yellow"
 
-                    : feature.properties.county_name
+                    : feature.properties
+                        .county_name
                         === "Nassau"
-                        ? "#4a90e2"
-                        : "#e26a6a",
+                    ? "#4a90e2"
+                    : "#e26a6a",
 
                 color: "black",
 
                 weight:
-                  wrongCount >= 3 && isCorrectTown
+                  wrongCount >= 3 &&
+                  isCorrectTown
                     ? 4
                     : 1,
 
                 fillOpacity:
                   isCompleted
                     ? 0.7
-                  : wrongCount >= 3 && isCorrectTown
+                    : wrongCount >= 3 &&
+                      isCorrectTown
                     ? 0.8
                     : 0.4
 
@@ -330,18 +557,21 @@ function App() {
                 click: () => {
 
                   const clicked =
-                    feature.properties.town_name;
+                    feature.properties
+                      .town_name;
 
                   if (
                     clicked.trim().toLowerCase()
                     ===
-                    targetTown.trim().toLowerCase()
+                    targetTown
+                      .trim()
+                      .toLowerCase()
                   ) {
 
                     setMessage("Correct!");
 
-                    setCompletedTowns([
-                      ...completedTowns,
+                    setCompletedTowns(prev => [
+                      ...prev,
                       clicked
                     ]);
 
@@ -359,9 +589,13 @@ function App() {
                     const newWrongCount =
                       wrongCount + 1;
 
-                    setWrongCount(newWrongCount);
+                    setWrongCount(
+                      newWrongCount
+                    );
 
-                    if (newWrongCount >= 3) {
+                    if (
+                      newWrongCount >= 3
+                    ) {
 
                       setMessage(
                         `Wrong! You clicked ${clicked}. Highlighting answer.`
@@ -381,16 +615,6 @@ function App() {
 
               });
 
-            }}
-          />
-        )}
-
-        {roads && (
-          <GeoJSON
-            data={roads}
-            style={{
-              color: "red",
-              weight: 4
             }}
           />
         )}
