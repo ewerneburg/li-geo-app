@@ -5,6 +5,15 @@
 "features": [
 { "type": "Feature", "properties": { "name": "All American Hamburger Drive-In", "coords": [ 40.666780858534764, -73.47517707476678 ] }, "geometry": { "type": "Point", "coordinates": [ -73.475177074766776, 40.666780858534764 ] } },
 { "type": "Feature", "properties": { "name": "2 Spring", "coords": [ 40.8735559630206, -73.53269609009831 ] }, "geometry": { "type": "Point", "coordinates": [ -73.532696090098312, 40.8735559630206 ] } },
-{ "type": "Feature", "properties": { "name": "Adventureland", "coords": [ 40.75275213824833, -73.41982254592678 ] }, "geometry": { "type": "Point", "coordinates": [ -73.419822545926777, 40.752752138248333 ] } }
+{ "type": "Feature", "properties": { "name": "Adventureland", "coords": [ 40.75275213824833, -73.41982254592678 ] }, "geometry": { "type": "Point", "coordinates": [ -73.419822545926777, 40.752752138248333 ] } },
+{ "type": "Feature", "properties": { "name": "Better Man", "coords": [ 40.75943035765345, -73.02153487476207 ] }, "geometry": { "type": "Point", "coordinates": [ -73.021534874762068, 40.75943035765345 ] } },
+{ "type": "Feature", "properties": { "name": "Tellers", "coords": [ 40.729957664590586, -73.21191081709237 ] }, "geometry": { "type": "Point", "coordinates": [ -73.211910817092374, 40.729957664590586 ] } },
+{ "type": "Feature", "properties": { "name": "Teddy Roosevelt", "coords": [ 40.8775742516946, -73.53398153242698 ] }, "geometry": { "type": "Point", "coordinates": [ -73.533981532426978, 40.877574251694597 ] } },
+{ "type": "Feature", "properties": { "name": "Chaminade", "coords": [ 40.744721040299105, -73.64943407291372 ] }, "geometry": { "type": "Point", "coordinates": [ -73.649434072913721, 40.744721040299105 ] } },
+{ "type": "Feature", "properties": { "name": "Estee Lauder", "coords": [ 40.77364381973923, -73.40640370359674 ] }, "geometry": { "type": "Point", "coordinates": [ -73.406403703596737, 40.773643819739227 ] } },
+{ "type": "Feature", "properties": { "name": "Eisenhower Park", "coords": [ 40.72677968414919, -73.57641731709249 ] }, "geometry": { "type": "Point", "coordinates": [ -73.576417317092492, 40.726779684149193 ] } },
+{ "type": "Feature", "properties": { "name": "Burns Park", "coords": [ 40.66581664730658, -73.44948430360249 ] }, "geometry": { "type": "Point", "coordinates": [ -73.449484303602489, 40.665816647306578 ] } },
+{ "type": "Feature", "properties": { "name": "Cantiague Park", "coords": [ 40.77045107738517, -73.5457895189392 ] }, "geometry": { "type": "Point", "coordinates": [ -73.545789518939202, 40.770451077385168 ] } },
+{ "type": "Feature", "properties": { "name": "Barrique", "coords": [ 40.697777654998546, -73.32267100360082 ] }, "geometry": { "type": "Point", "coordinates": [ -73.322671003600817, 40.697777654998546 ] } }
 ]
 }
