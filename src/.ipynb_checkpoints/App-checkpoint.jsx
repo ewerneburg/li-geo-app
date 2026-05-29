@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   GeoJSON,
   MapContainer,
   Marker,
-  Popup,
-  TileLayer,
-  Tooltip
+  TileLayer
 } from "react-leaflet";
 
 import L from "leaflet";
@@ -36,6 +34,14 @@ function App() {
 
   const [target, setTarget] =
     useState(null);
+
+  const targetRef = useRef(null);
+
+    useEffect(() => {
+    
+      targetRef.current = target;
+    
+    }, [target]);
 
   const [completedItems, setCompletedItems] =
     useState([]);
@@ -203,46 +209,118 @@ function App() {
   }
 
   function handleCorrect(clicked) {
-
-    setMessage("Correct!");
-
-    setCompletedItems(prev => [
-      ...prev,
-      clicked
-    ]);
-
-    const nextTarget =
-      pickRandomItem(
-        getCurrentFeatures()
-      );
-
-    setTarget(nextTarget);
-
-    setWrongCount(0);
-  }
+    
+      setMessage("Correct!");
+    
+      setCompletedItems(prev => {
+    
+        const updatedCompleted = [
+          ...prev,
+          clicked
+        ];
+    
+        const features =
+          getCurrentFeatures();
+    
+        const remaining =
+          features.filter(f => {
+    
+            const name =
+              quizType === "towns"
+                ? f.properties.town_name
+                : f.properties.name;
+    
+            return !updatedCompleted.includes(
+              name
+            );
+    
+          });
+    
+        if (remaining.length === 0) {
+    
+          setTarget(null);
+    
+          setMessage(
+            "You completed the quiz!"
+          );
+    
+          return updatedCompleted;
+    
+        }
+    
+        const randomFeature =
+          remaining[
+            Date.now() %
+              remaining.length
+          ];
+    
+        const nextTarget =
+          quizType === "towns"
+            ? randomFeature.properties
+                .town_name
+            : randomFeature.properties
+                .name;
+    
+        setTarget(nextTarget);
+    
+        return updatedCompleted;
+    
+      });
+    
+      setWrongCount(0);
+    
+    }
 
   function handleWrong(clicked) {
-
-    const newWrongCount =
-      wrongCount + 1;
-
-    setWrongCount(newWrongCount);
-
-    if (newWrongCount >= 3) {
-
-      setMessage(
-        `Wrong! You clicked ${clicked}. Highlighting answer.`
-      );
-
-    } else {
-
-      setMessage(
-        `Wrong! You clicked ${clicked}`
-      );
-
+    
+      setWrongCount(prev => {
+    
+        const newWrongCount =
+          prev + 1;
+    
+        if (newWrongCount >= 3) {
+    
+          setMessage(
+            `Wrong! You clicked ${clicked}. Highlighting answer.`
+          );
+    
+        } else {
+    
+          setMessage(
+            `Wrong! You clicked ${clicked}`
+          );
+    
+        }
+    
+        return newWrongCount;
+    
+      });
+    
     }
-  }
+    
+  function createLandmarkIcon(
+    color = "#222"
+  ) {
 
+    return L.divIcon({
+      className: "",
+      html: `
+        <div
+          style="
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: ${color};
+            border: 2px solid white;
+            box-shadow: 0 0 4px rgba(0,0,0,0.4);
+          "
+        ></div>
+      `,
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    });
+
+  }
 
   if (!gameStarted) {
 
@@ -711,15 +789,13 @@ function App() {
                   .town_name;
 
               const isCorrect =
-                quizType === "towns"
-                &&
                 townName
                   .toLowerCase()
                   .trim()
                 ===
-                target
+                targetRef.current
                   ?.toLowerCase()
-                  .trim();
+                  .trim()
 
               const completed =
                 completedItems.includes(
@@ -727,28 +803,37 @@ function App() {
                 );
 
               return {
+
                 fillColor:
                   completed
                     ? "green"
+                    : wrongCount >= 3
+                      && isCorrect
+                    ? "yellow"
                     : feature.properties
                         .county_name
                       === "Nassau"
                     ? "#4a90e2"
                     : "#e26a6a",
+
                 fillOpacity:
                   completed
                     ? 0.7
+                    : (
+                        isCorrect
+                        && wrongCount >= 3
+                      )
+                    ? 0.8
                     : 0.35,
-                color:
-                  isCorrect
-                  && wrongCount >= 3
-                    ? "yellow"
-                    : "black",
+
+                color: "black",
+
                 weight:
                   isCorrect
                   && wrongCount >= 3
                     ? 4
                     : 1
+
               };
 
             }}
@@ -774,8 +859,8 @@ function App() {
                       .toLowerCase()
                       .trim()
                     ===
-                    target
-                      .toLowerCase()
+                    targetRef.current
+                      ?.toLowerCase()
                       .trim()
                   ) {
 
@@ -795,48 +880,52 @@ function App() {
           />
         )}
 
+        {/* Town Labels */}
+        {towns
+          && quizType !== "towns"
+          && towns.features.map(
+            feature => {
 
-          {/* Town Labels During Roads / Landmarks */}
-          {towns
-            && quizType !== "towns"
-            && towns.features.map(
-              feature => {
-          
-                const geoLayer =
-                  L.geoJSON(feature);
-          
-                const bounds =
-                  geoLayer.getBounds();
-          
-                if (!bounds.isValid()) {
-                  return null;
-                }
-          
-                const center =
-                  bounds.getCenter();
-          
-                return (
-          
+              const geoLayer =
+                L.geoJSON(feature);
+
+              const bounds =
+                geoLayer.getBounds();
+
+              if (!bounds.isValid()) {
+                return null;
+              }
+
+              const center =
+                bounds.getCenter();
+
+              return (
+
                 <Marker
                   key={
                     feature.properties
                       .town_name
                   }
                   position={center}
+                  interactive={false}
                   icon={L.divIcon({
-                    className: "town-label-div",
+                    className: "",
                     html: `
                       <div
                         style="
-                          font-size: 0.7vw;
+                          font-size: clamp(12px, 1vw, 18px);
                           font-weight: bold;
                           color: black;
                           white-space: nowrap;
                           text-shadow:
                             1px 1px 2px white,
-                            -1px -1px 2px white;
+                            -1px -1px 2px white,
+                            0px 0px 3px white;
                           transform: translate(-50%, -50%);
                           pointer-events: none;
+                          background: transparent;
+                          border: none;
+                          box-shadow: none;
                         "
                       >
                         ${feature.properties.town_name}
@@ -845,183 +934,187 @@ function App() {
                     iconSize: [0, 0]
                   })}
                 />
-                    
-                );
-          
-              }
-            )}
 
-          {/* Roads */}
-            {roads && (
-              <>
-              
-                <GeoJSON
-                  data={roads}
-                  style={feature => {
-            
-                    const roadName =
-                      feature.properties.name;
-            
-                    const isCorrect =
-                      quizType === "roads"
-                      &&
+              );
+
+            }
+          )}
+
+        {/* Roads */}
+        {roads && (
+          <>
+          
+            <GeoJSON
+              data={roads}
+              style={feature => {
+
+                const roadName =
+                  feature.properties.name;
+
+                const isCorrect =
+                  roadName
+                    .toLowerCase()
+                    .trim()
+                  ===
+                  targetRef.current
+                    ?.toLowerCase()
+                    .trim()
+
+                const completed =
+                  completedItems.includes(
+                    roadName
+                  );
+
+                return {
+
+                  color:
+                    completed
+                      ? "green"
+                      : isCorrect
+                      && wrongCount >= 3
+                      ? "yellow"
+                      : "#333",
+
+                  weight:
+                    completed
+                      ? 6
+                      : isCorrect
+                      && wrongCount >= 3
+                      ? 8
+                      : 4,
+
+                  opacity: 0.9
+
+                };
+
+              }}
+              onEachFeature={(
+                feature,
+                layer
+              ) => {
+
+                const roadName =
+                  feature.properties.name;
+
+                if (
+                  quizType !== "roads"
+                ) return;
+
+                layer.on({
+
+                  click: () => {
+
+                    if (
                       roadName
                         .toLowerCase()
                         .trim()
                       ===
-                      target
+                      targetRef.current
                         ?.toLowerCase()
-                        .trim();
-            
-                    const completed =
-                      completedItems.includes(
+                        .trim()
+                    ) {
+
+                      handleCorrect(
                         roadName
                       );
-            
-                    return {
-                      color:
-                        completed
-                          ? "green"
-                          : isCorrect
-                          && wrongCount >= 3
-                          ? "yellow"
-                          : "#333",
-                      weight:
-                        completed
-                          ? 6
-                          : isCorrect
-                          && wrongCount >= 3
-                          ? 8
-                          : 4,
-                      opacity: 0.9
-                    };
-            
-                  }}
-                  onEachFeature={(
-                    feature,
-                    layer
-                  ) => {
-            
-                    const roadName =
-                      feature.properties.name;
-            
-                    if (
-                      quizType !== "roads"
-                    ) return;
-            
-                    layer.on({
-            
-                      click: () => {
-            
-                        if (
-                          roadName
-                            .toLowerCase()
-                            .trim()
-                          ===
-                          target
-                            .toLowerCase()
-                            .trim()
-                        ) {
-            
-                          handleCorrect(
-                            roadName
-                          );
-            
-                        } else {
-            
-                          handleWrong(
-                            roadName
-                          );
-            
-                        }
-            
-                      }
-            
-                    });
-            
-                  }}
-                />
-            
-                {/* Road Labels During Town Quiz */}
-                {quizType === "towns"
-                  && roads.features.map(
-                    feature => {
-            
-                      const roadName =
-                        feature.properties.name;
-            
-                      const coords =
-                        feature.geometry.coordinates;
-            
-                      let center;
-            
-                      if (
-                        Array.isArray(coords[0][0])
-                      ) {
-            
-                        const line =
-                          coords[0];
-            
-                        center =
-                          line[
-                            Math.floor(
-                              line.length / 2
-                            )
-                          ];
-            
-                      } else {
-            
-                        center =
-                          coords[
-                            Math.floor(
-                              coords.length / 2
-                            )
-                          ];
-            
-                      }
-            
-                      return (
-            
-                        <Marker
-                          key={roadName}
-                          position={[
-                            center[1],
-                            center[0]
-                          ]}
-                          interactive={false}
-                          icon={L.divIcon({
-                            className:
-                              "road-name-marker",
-                            html: `
-                              <div style="
-                                font-size: 0.55vw;
-                                font-weight: bold;
-                                color: #222;
-                                white-space: nowrap;
-                                text-shadow:
-                                  1px 1px 2px white,
-                                  -1px -1px 2px white;
-                                pointer-events: none;
-                              ">
-                                ${roadName}
-                              </div>
-                            `,
-                            iconSize: [0, 0]
-                          })}
-                        />
-            
+
+                    } else {
+
+                      handleWrong(
+                        roadName
                       );
-            
+
                     }
-                  )}
-            
-              </>
-            )}
+
+                  }
+
+                });
+
+              }}
+            />
+
+            {/* Road Labels */}
+            {quizType !== "roads"
+              && roads.features.map(
+                feature => {
+
+                  const roadName =
+                    feature.properties.name;
+
+                  const coords =
+                    feature.geometry.coordinates;
+
+                  let center;
+
+                  if (
+                    Array.isArray(coords[0][0])
+                  ) {
+
+                    const line =
+                      coords[0];
+
+                    center =
+                      line[
+                        Math.floor(
+                          line.length / 2
+                        )
+                      ];
+
+                  } else {
+
+                    center =
+                      coords[
+                        Math.floor(
+                          coords.length / 2
+                        )
+                      ];
+
+                  }
+
+                  return (
+
+                    <Marker
+                      key={roadName}
+                      position={[
+                        center[1],
+                        center[0]
+                      ]}
+                      interactive={false}
+                      icon={L.divIcon({
+                        className: "",
+                        html: `
+                          <div style="
+                            font-size: clamp(11px, 0.9vw, 17px);
+                            font-weight: bold;
+                            color: #222;
+                            white-space: nowrap;
+                            text-shadow:
+                              1px 1px 2px white,
+                              -1px -1px 2px white,
+                              0px 0px 3px white;
+                            pointer-events: none;
+                            background: transparent;
+                            border: none;
+                            box-shadow: none;
+                          ">
+                            ${roadName}
+                          </div>
+                        `,
+                        iconSize: [0, 0]
+                      })}
+                    />
+
+                  );
+
+                }
+              )}
+
+          </>
+        )}
 
         {/* Landmarks */}
         {landmarks
-          && quizType ===
-          "landmarks"
+          && quizType === "landmarks"
           && landmarks.features.map(
             feature => {
 
@@ -1037,6 +1130,26 @@ function App() {
                   landmarkName
                 );
 
+              const isCorrect =
+                landmarkName
+                  .toLowerCase()
+                  .trim()
+                ===
+                targetRef.current
+                  ?.toLowerCase()
+                  .trim()
+
+              let color = "#222";
+
+              if (completed) {
+                color = "green";
+              } else if (
+                isCorrect
+                && wrongCount >= 3
+              ) {
+                color = "yellow";
+              }
+
               return (
 
                 <Marker
@@ -1045,16 +1158,24 @@ function App() {
                     coords[1],
                     coords[0]
                   ]}
+                  icon={createLandmarkIcon(
+                    color
+                  )}
                   eventHandlers={{
                     click: () => {
+
+                      if (
+                        quizType !==
+                        "landmarks"
+                      ) return;
 
                       if (
                         landmarkName
                           .toLowerCase()
                           .trim()
                         ===
-                        target
-                          .toLowerCase()
+                        targetRef.current
+                          ?.toLowerCase()
                           .trim()
                       ) {
 
@@ -1072,16 +1193,7 @@ function App() {
 
                     }
                   }}
-                >
-
-                  <Popup>
-                    <strong>
-                      {landmarkName}
-                    </strong>
-                  </Popup>
-
-
-                </Marker>
+                />
 
               );
 
