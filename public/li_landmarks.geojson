@@ -14,6 +14,8 @@
 { "type": "Feature", "properties": { "name": "Eisenhower Park", "coords": [ 40.72677968414919, -73.57641731709249 ] }, "geometry": { "type": "Point", "coordinates": [ -73.576417317092492, 40.726779684149193 ] } },
 { "type": "Feature", "properties": { "name": "Burns Park", "coords": [ 40.66581664730658, -73.44948430360249 ] }, "geometry": { "type": "Point", "coordinates": [ -73.449484303602489, 40.665816647306578 ] } },
 { "type": "Feature", "properties": { "name": "Cantiague Park", "coords": [ 40.77045107738517, -73.5457895189392 ] }, "geometry": { "type": "Point", "coordinates": [ -73.545789518939202, 40.770451077385168 ] } },
-{ "type": "Feature", "properties": { "name": "Barrique", "coords": [ 40.697777654998546, -73.32267100360082 ] }, "geometry": { "type": "Point", "coordinates": [ -73.322671003600817, 40.697777654998546 ] } }
+{ "type": "Feature", "properties": { "name": "Barrique", "coords": [ 40.697777654998546, -73.32267100360082 ] }, "geometry": { "type": "Point", "coordinates": [ -73.322671003600817, 40.697777654998546 ] } },
+{ "type": "Feature", "properties": { "name": "Tobay", "coords": [ 40.61229032112467, -73.43209858694993 ] }, "geometry": { "type": "Point", "coordinates": [ -73.432098586949934, 40.612290321124668 ] } },
+{ "type": "Feature", "properties": { "name": "Applebee's in Hicksville", "coords": [ 40.74580698100101, -73.5006599324339 ] }, "geometry": { "type": "Point", "coordinates": [ -73.500659932433905, 40.74580698100101 ] } }
 ]
 }
